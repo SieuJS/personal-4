@@ -9,15 +9,20 @@ const Repository = require('./repository');
 
 class UserRepository extends Repository {
     async create(adder){
-        adder.id = this.randId();
-
+        if(!adder.id) {
+            adder.id = this.randId();
+        }
+        let records;
+        let hashedBuf;
+        if(adder.password)
+        {
         const salt = crypto.randomBytes(8).toString('hex');
-        const hashedBuf = await scrypt(adder.password, salt,64);
-        
-        const records = await this.readFile();
+        hashedBuf = await scrypt(adder.password, salt,64);
+        }
+        records = await this.readFile();
         const record = {
             ...adder,
-            password: `${hashedBuf.toString('hex')}.${salt}`
+            ... (hashedBuf ? {password: `${hashedBuf.toString('hex')}.${salt}`} : {})
         };
         records.push(record);
         this.writeFile(records);
@@ -29,6 +34,19 @@ class UserRepository extends Repository {
         const hashedBuf  = await scrypt(raw, salt, 64);
         return (hashedBuf.toString('hex') === hashed);
     }
+
+    async login(email, password) {
+    const user = await this.getOneBy({ email });
+    if (user) {
+        const auth = await this.comparePassword(user.password, password);
+        if (auth) {
+        return user;
+        }
+        throw Error('incorrect password');
+    }
+    throw Error('incorrect email');
+    }
+    
 }; 
 
 const test = async ()=>{
