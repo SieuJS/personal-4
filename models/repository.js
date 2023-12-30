@@ -50,7 +50,7 @@ module.exports = class Repository {
     }
 
     // Maniputlate on the data: 
-    async getOne(id){
+    async findById(id){
         const records = await this.readFile();
         return records.find(obj => obj.id === id);
     };
