@@ -8,7 +8,7 @@ const passport = require('passport');
 
 const authRouter = require('./controllers/google-auth');
 const protectedRouter = require('./controllers/protected-route');
-
+const localAuthRouter = require('./controllers/myServer')
 
 // middleware
 app.use(express.static('public'));
@@ -47,9 +47,8 @@ passport.deserializeUser(function (obj, cb) {
 });
 
 app.use('/auth/google', authRouter);
+app.use('auth/myAuth', localAuthRouter);
 app.use('/protected', protectedRouter);
-
-
 
 app.get('/', (req, res) => res.render('home'));
 app.get('/smoothies', requireAuth, (req, res) => res.render('smoothies'));
